@@ -52,7 +52,7 @@ export const Header = () => {
             <p>Notifications</p>
           </Link>
           <SignedOut>
-            <Button asChild variant="secondary">
+            <Button asChild className="bg-[#0b63c4] text-white">
               <SignInButton />
             </Button>
           </SignedOut>
