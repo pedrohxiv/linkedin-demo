@@ -1,7 +1,10 @@
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { SearchIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Icons } from "./icons";
+
+import { Icons } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 
 export const Header = () => {
   return (
@@ -24,7 +27,7 @@ export const Header = () => {
             />
           </form>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center mx-2">
           <Link
             href="/"
             className="icon hidden md:flex border-b-2 border-black text-black"
@@ -44,10 +47,18 @@ export const Header = () => {
             <Icons.message className="size-6" />
             <p>Messaging</p>
           </Link>
-          <Link href="/" className="icon hidden md:flex">
+          <Link href="/" className="icon hidden md:flex mr-2">
             <Icons.bell className="size-6" />
             <p>Notifications</p>
           </Link>
+          <SignedOut>
+            <Button asChild variant="secondary">
+              <SignInButton />
+            </Button>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </div>
       </div>
     </header>
