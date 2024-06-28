@@ -1,3 +1,4 @@
+import { PostForm } from "@/components/post-form";
 import { UserInformation } from "@/components/user-information";
 
 const RootPage = () => {
@@ -6,7 +7,9 @@ const RootPage = () => {
       <section className="hidden md:inline md:col-span-2">
         <UserInformation />
       </section>
-      <section className="col-span-full md:col-span-6 xl:col-span-4 xl:max-w-xl mx-auto w-full"></section>
+      <section className="col-span-full md:col-span-6 xl:col-span-4 xl:max-w-xl mx-auto w-full">
+        <PostForm />
+      </section>
       <section className="hidden xl:inline justify-center col-span-2"></section>
     </div>
   );

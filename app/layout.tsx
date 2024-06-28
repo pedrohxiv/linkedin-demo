@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 
 import { Header } from "@/components/header";
+import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
 
@@ -21,6 +22,7 @@ const RootLayout = ({ children }: Props) => {
         <body className="min-h-screen flex flex-col">
           <Header />
           <main className="bg-[#f4f2ed] flex-1 w-full">{children}</main>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
