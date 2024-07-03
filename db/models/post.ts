@@ -12,6 +12,7 @@ export interface IPostBase {
 }
 
 export interface IPost extends IPostBase, Document {
+  _id: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -121,5 +122,5 @@ PostSchema.statics.getAllPosts = async function () {
 };
 
 export const Post =
-  (models.Post as IPostModel) ||
+  (models.Post as unknown as IPostModel) ||
   mongoose.model<IPostDocument, IPostModel>("Post", PostSchema);

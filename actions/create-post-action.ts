@@ -1,10 +1,14 @@
 "use server";
 
 import { currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { UTApi } from "uploadthing/server";
 
 import { AddPostRequestBody } from "@/app/api/posts/route";
 import { Post } from "@/db/models/post";
 import { IUser } from "@/types/user";
+
+const uploadthing = new UTApi();
 
 export const createPostAction = async (formData: FormData) => {
   const user = await currentUser();
@@ -15,8 +19,6 @@ export const createPostAction = async (formData: FormData) => {
 
   const postInput = formData.get("postInput") as string;
   const image = formData.get("image") as File;
-
-  let imageUrl: string | undefined;
 
   if (!postInput) {
     throw new Error("post input is required");
@@ -31,9 +33,12 @@ export const createPostAction = async (formData: FormData) => {
 
   try {
     if (image.size > 0) {
+      const response = await uploadthing.uploadFiles([image]);
+
       const body: AddPostRequestBody = {
         user: userDB,
         text: postInput,
+        imageUrl: response[0].data?.url,
       };
 
       await Post.create(body);
@@ -47,5 +52,7 @@ export const createPostAction = async (formData: FormData) => {
     }
   } catch (error: any) {
     throw new Error("Failed to create post", error);
+  } finally {
+    revalidatePath("/");
   }
 };
