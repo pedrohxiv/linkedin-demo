@@ -31,7 +31,7 @@ export const PostForm = () => {
     }
   };
 
-  const handlePostAction = async (formData: FormData) => {
+  const handleCreatePostAction = async (formData: FormData) => {
     const data = formData;
 
     formRef.current?.reset();
@@ -62,7 +62,7 @@ export const PostForm = () => {
       <form
         ref={formRef}
         className="p-3 bg-white rounded-lg border"
-        action={(formData) => handlePostAction(formData)}
+        action={(formData) => handleCreatePostAction(formData)}
       >
         <div className="flex items-center space-x-2">
           <Avatar>

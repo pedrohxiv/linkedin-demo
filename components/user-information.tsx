@@ -26,6 +26,15 @@ export const UserInformation = async () => {
             {user?.lastName}-{user?.id.slice(-4)}
           </p>
         </div>
+        <hr className="w-full border-gray-200 my-5" />
+        <div className="flex justify-between w-full px-4 text-sm">
+          <p className="font-semibold">Posts</p>
+          <p className="text-blue-400">{0}</p>
+        </div>
+        <div className="flex justify-between w-full px-4 text-sm">
+          <p className="font-semibold">Comments</p>
+          <p className="text-blue-400">{0}</p>
+        </div>
       </SignedIn>
       <SignedOut>
         <div className="text-center space-x-2">
@@ -35,15 +44,6 @@ export const UserInformation = async () => {
           <p className="font-semibold mt-2">You are not signed in</p>
         </div>
       </SignedOut>
-      <hr className="w-full border-gray-200 my-5" />
-      <div className="flex justify-between w-full px-4 text-sm">
-        <p className="font-semibold">Posts</p>
-        <p className="text-blue-400">{0}</p>
-      </div>
-      <div className="flex justify-between w-full px-4 text-sm">
-        <p className="font-semibold">Comments</p>
-        <p className="text-blue-400">{0}</p>
-      </div>
     </div>
   );
 };

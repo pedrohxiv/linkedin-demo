@@ -4,7 +4,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/db";
 import { Post } from "@/db/models/post";
 
-export interface UnlikePostRequestBody {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: { postId: string } }
+) {
+  try {
+    await connectDB();
+
+    const post = await Post.findById(params.postId);
+
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    const likes = post.likes;
+
+    return NextResponse.json(likes);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "An error ocurred while fetching likes" },
+      { status: 500 }
+    );
+  }
+}
+
+export interface LikePostRequestBody {
   userId: string;
 }
 
@@ -14,7 +40,7 @@ export async function POST(
 ) {
   auth().protect();
 
-  const { userId }: UnlikePostRequestBody = await request.json();
+  const { userId }: LikePostRequestBody = await request.json();
 
   try {
     await connectDB();
@@ -25,14 +51,14 @@ export async function POST(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    await post.unlikePost(userId);
+    await post.likePost(userId);
 
-    return NextResponse.json({ message: "Post unliked sucessfully" });
+    return NextResponse.json({ message: "Post liked sucessfully" });
   } catch (error) {
     console.error(error);
 
     return NextResponse.json(
-      { error: "An error ocurred while unliking the post" },
+      { error: "An error ocurred while liking the post" },
       { status: 500 }
     );
   }
