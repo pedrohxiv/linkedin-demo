@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { SignedIn, useUser } from "@clerk/nextjs";
 import { MessageCircle, Repeat2, Send, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -138,7 +138,9 @@ export const PostOptions = ({ post }: Props) => {
       </div>
       {isCommentsOpen && (
         <div className="p-4">
-          {user?.id && <CommentForm postId={post._id} />}
+          <SignedIn>
+            <CommentForm postId={post._id} />
+          </SignedIn>
           {<CommentFeed post={post} />}
         </div>
       )}
