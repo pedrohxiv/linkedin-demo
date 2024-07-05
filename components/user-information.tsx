@@ -3,9 +3,22 @@ import { currentUser } from "@clerk/nextjs/server";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { IPostDocument } from "@/db/models/post";
 
-export const UserInformation = async () => {
+interface Props {
+  posts: IPostDocument[];
+}
+
+export const UserInformation = async ({ posts }: Props) => {
   const user = await currentUser();
+
+  const userPosts = posts.filter((post) => post.user.userId === user?.id);
+
+  const userComments = posts.flatMap(
+    (post) =>
+      post?.comments?.filter((comment) => comment.user.userId === user?.id) ||
+      []
+  );
 
   return (
     <div className="flex flex-col justify-center items-center bg-white mr-6 rounded-lg border py-4">
@@ -29,11 +42,11 @@ export const UserInformation = async () => {
         <hr className="w-full border-gray-200 my-5" />
         <div className="flex justify-between w-full px-4 text-sm">
           <p className="font-semibold">Posts</p>
-          <p className="text-blue-400">{0}</p>
+          <p className="text-blue-400">{userPosts.length}</p>
         </div>
         <div className="flex justify-between w-full px-4 text-sm">
           <p className="font-semibold">Comments</p>
-          <p className="text-blue-400">{0}</p>
+          <p className="text-blue-400">{userComments.length}</p>
         </div>
       </SignedIn>
       <SignedOut>

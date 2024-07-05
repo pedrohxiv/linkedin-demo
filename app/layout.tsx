@@ -19,9 +19,9 @@ const RootLayout = ({ children }: Props) => {
   return (
     <ClerkProvider>
       <html>
-        <body className="min-h-screen flex flex-col">
+        <body className="min-h-screen flex flex-col bg-[#f4f2ed]">
           <Header />
-          <main className="bg-[#f4f2ed] flex-1 w-full">{children}</main>
+          <main className="flex-1 w-full max-w-7xl mx-auto">{children}</main>
           <Toaster />
         </body>
       </html>
