@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
 
-export const deletePostAction = async (postId: string) => {
+export const likeAction = async (postId: string) => {
   const user = await currentUser();
 
   if (!user?.id) {
@@ -16,29 +16,44 @@ export const deletePostAction = async (postId: string) => {
     where: {
       id: postId,
     },
-    include: {
-      user: true,
-    },
   });
 
   if (!post) {
     throw new Error("Post not found");
   }
 
-  if (post.user.userId !== user.id) {
-    throw new Error("Post does not belong to the user");
+  let userData = await db.user.findFirst({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  if (!userData) {
+    userData = await db.user.create({
+      data: {
+        userId: user.id,
+        userImage: user.imageUrl,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+      },
+    });
   }
 
   try {
-    await db.post.delete({
+    await db.post.update({
       where: {
         id: postId,
+      },
+      data: {
+        likes: {
+          push: userData.userId,
+        },
       },
     });
   } catch (error) {
     console.error(error);
 
-    throw new Error("Failed to delete post");
+    throw new Error("Failed to like post");
   } finally {
     revalidatePath("/");
   }

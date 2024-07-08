@@ -1,17 +1,17 @@
 import ReactTimeago from "react-timeago";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { IPostDocument } from "@/db/models/post";
+import { IPost } from "@/interfaces/post";
 
 interface Props {
-  post: IPostDocument;
+  post: IPost["post"];
 }
 
 export const CommentFeed = ({ post }: Props) => {
   return (
     <div className="space-y-2 mt-3">
       {post.comments?.map((comment) => (
-        <div key={comment._id} className="flex space-x-1">
+        <div key={comment.id} className="flex space-x-1">
           <Avatar>
             <AvatarImage src={comment.user.userImage} />
             <AvatarFallback className="bg-[#0b63c4] font-medium text-white">

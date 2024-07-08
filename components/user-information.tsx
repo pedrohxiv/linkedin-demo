@@ -3,22 +3,18 @@ import { currentUser } from "@clerk/nextjs/server";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { IPostDocument } from "@/db/models/post";
+import { IPost } from "@/interfaces/post";
 
 interface Props {
-  posts: IPostDocument[];
+  posts: IPost["post"][];
 }
 
 export const UserInformation = async ({ posts }: Props) => {
   const user = await currentUser();
 
-  const userPosts = posts.filter((post) => post.user.userId === user?.id);
+  const userPosts = posts.filter((post) => post.user.id === user?.id);
 
-  const userComments = posts.flatMap(
-    (post) =>
-      post?.comments?.filter((comment) => comment.user.userId === user?.id) ||
-      []
-  );
+  const userComments = [];
 
   return (
     <div className="flex flex-col justify-center items-center bg-white mr-6 rounded-lg border py-4">

@@ -4,15 +4,27 @@ import { PostFeed } from "@/components/post-feed";
 import { PostForm } from "@/components/post-form";
 import { UserInformation } from "@/components/user-information";
 import { Widget } from "@/components/widget";
-import { connectDB } from "@/db";
-import { Post } from "@/db/models/post";
+import { db } from "@/lib/db";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 const RootPage = async () => {
-  await connectDB();
-
-  const posts = await Post.getAllPosts();
+  const posts = await db.post.findMany({
+    include: {
+      user: true,
+      comments: {
+        include: {
+          user: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return (
     <div className="grid grid-cols-8 mt-5 sm:px-5">

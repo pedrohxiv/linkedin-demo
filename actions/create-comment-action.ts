@@ -3,9 +3,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
-import { ICommentBase } from "@/db/models/comment";
-import { Post } from "@/db/models/post";
-import { IUser } from "@/types/user";
+import { db } from "@/lib/db";
 
 export const createCommentAction = async (
   postId: string,
@@ -13,7 +11,7 @@ export const createCommentAction = async (
 ) => {
   const user = await currentUser();
 
-  if (!user) {
+  if (!user?.id) {
     throw new Error("User not authenticated");
   }
 
@@ -27,28 +25,53 @@ export const createCommentAction = async (
     throw new Error("Comment input is required");
   }
 
-  const post = await Post.findById(postId);
+  const post = await db.post.findUnique({
+    where: {
+      id: postId,
+    },
+  });
 
   if (!post) {
     throw new Error("Post not found");
   }
 
-  const userDB: IUser = {
-    userId: user.id,
-    userImage: user.imageUrl,
-    firstName: user.firstName || "",
-    lastName: user.lastName || "",
-  };
+  let userData = await db.user.findFirst({
+    where: {
+      userId: user.id,
+    },
+  });
 
-  const comment: ICommentBase = {
-    user: userDB,
-    text: commentInput,
-  };
+  if (!userData) {
+    userData = await db.user.create({
+      data: {
+        userId: user.id,
+        userImage: user.imageUrl,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+      },
+    });
+  }
 
   try {
-    await post.commentOnPost(comment);
-  } catch (error: any) {
-    throw new Error("Failed to create comment", error);
+    await db.comment.create({
+      data: {
+        text: commentInput,
+        user: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        post: {
+          connect: {
+            id: postId,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    throw new Error("Failed to create comment");
   } finally {
     revalidatePath("/");
   }

@@ -11,10 +11,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { IPostDocument } from "@/db/models/post";
+import { IPost } from "@/interfaces/post";
 
 interface Props {
-  post: IPostDocument;
+  post: IPost["post"];
 }
 
 export const Post = ({ post }: Props) => {
@@ -61,7 +61,7 @@ export const Post = ({ post }: Props) => {
             </p>
             <p className="text-xs text-gray-400">
               @{post.user.firstName}
-              {post.user.lastName}-{post.user.userId.slice(-4)}
+              {post.user.lastName}-{post.user.id.slice(-4)}
             </p>
             <p className="text-xs text-gray-400">
               <ReactTimeago date={new Date(post.createdAt)} />
@@ -71,7 +71,7 @@ export const Post = ({ post }: Props) => {
             <Button
               className="opacity-0 group-hover:opacity-100 rounded-full hover:bg-destructive/10 p-3"
               variant="ghost"
-              onClick={() => handleDeletePostAction(post._id)}
+              onClick={() => handleDeletePostAction(post.id)}
             >
               <Trash2 className="size-4 text-destructive" />
             </Button>

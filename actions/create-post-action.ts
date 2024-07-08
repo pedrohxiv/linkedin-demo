@@ -4,54 +4,73 @@ import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { UTApi } from "uploadthing/server";
 
-import { AddPostRequestBody } from "@/app/api/posts/route";
-import { Post } from "@/db/models/post";
-import { IUser } from "@/types/user";
-
-const uploadthing = new UTApi();
+import { db } from "@/lib/db";
 
 export const createPostAction = async (formData: FormData) => {
   const user = await currentUser();
 
-  if (!user) {
+  if (!user?.id) {
     throw new Error("User not authenticated");
   }
 
   const postInput = formData.get("postInput") as string;
-  const image = formData.get("image") as File;
 
   if (!postInput) {
-    throw new Error("post input is required");
+    throw new Error("Post input is required");
   }
 
-  const userDB: IUser = {
-    userId: user.id,
-    userImage: user.imageUrl,
-    firstName: user.firstName || "",
-    lastName: user.lastName || "",
-  };
+  const image = formData.get("image") as File;
+
+  let userData = await db.user.findFirst({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  if (!userData) {
+    userData = await db.user.create({
+      data: {
+        userId: user.id,
+        userImage: user.imageUrl,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+      },
+    });
+  }
 
   try {
     if (image.size > 0) {
+      const uploadthing = new UTApi();
+
       const response = await uploadthing.uploadFiles([image]);
 
-      const body: AddPostRequestBody = {
-        user: userDB,
-        text: postInput,
-        imageUrl: response[0].data?.url,
-      };
-
-      await Post.create(body);
+      await db.post.create({
+        data: {
+          text: postInput,
+          imageUrl: response[0].data?.url,
+          user: {
+            connect: {
+              id: userData.id,
+            },
+          },
+        },
+      });
     } else {
-      const body: AddPostRequestBody = {
-        user: userDB,
-        text: postInput,
-      };
-
-      await Post.create(body);
+      await db.post.create({
+        data: {
+          text: postInput,
+          user: {
+            connect: {
+              id: userData.id,
+            },
+          },
+        },
+      });
     }
-  } catch (error: any) {
-    throw new Error("Failed to create post", error);
+  } catch (error) {
+    console.error(error);
+
+    throw new Error("Failed to create post");
   } finally {
     revalidatePath("/");
   }

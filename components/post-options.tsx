@@ -4,15 +4,18 @@ import { SignedIn, useUser } from "@clerk/nextjs";
 import { MessageCircle, Repeat2, Send, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { getLikes } from "@/actions/get-likes";
+import { likeAction } from "@/actions/like-action";
+import { unlikeAction } from "@/actions/unlike-action";
 import { CommentFeed } from "@/components/comment-feed";
 import { CommentForm } from "@/components/comment-form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { IPostDocument } from "@/db/models/post";
+import { IPost } from "@/interfaces/post";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  post: IPostDocument;
+  post: IPost["post"];
 }
 
 export const PostOptions = ({ post }: Props) => {
@@ -31,29 +34,19 @@ export const PostOptions = ({ post }: Props) => {
     const originalLiked = liked;
     const originalLikes = likes;
 
-    const newLikes = liked
-      ? likes?.filter((like) => like !== user.id)
-      : [...(likes ?? []), user.id];
-
-    const body: { userId: string } = {
-      userId: user.id,
-    };
-
     setLiked(!liked);
-    setLikes(newLikes);
 
-    const response = await fetch(
-      `/api/posts/${post._id}/${liked ? "unlike" : "like"}`,
-      {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify(body),
+    try {
+      if (liked) {
+        await unlikeAction(post.id);
+      } else {
+        await likeAction(post.id);
       }
-    );
 
-    const fetchLikesResponse = await fetch(`/api/posts/${post._id}/like`);
+      setLikes(await getLikes(post.id));
+    } catch (error) {
+      console.error(error);
 
-    if (!response.ok || !fetchLikesResponse.ok) {
       setLiked(originalLiked);
       setLikes(originalLikes);
 
@@ -63,10 +56,6 @@ export const PostOptions = ({ post }: Props) => {
         description: "There was a problem with your request.",
       });
     }
-
-    const likesData = await fetchLikesResponse.json();
-
-    setLikes(likesData);
   };
 
   useEffect(() => {
@@ -139,7 +128,7 @@ export const PostOptions = ({ post }: Props) => {
       {isCommentsOpen && (
         <div className="p-4">
           <SignedIn>
-            <CommentForm postId={post._id} />
+            <CommentForm postId={post.id} />
           </SignedIn>
           {<CommentFeed post={post} />}
         </div>
